@@ -1,0 +1,29 @@
+﻿<style>
+    .Login {
+        background-color: rgb(98, 178, 219);
+        padding: 12px;
+        text-align: center;
+        margin:26px;
+    }
+
+    #Login{
+    }
+</style>
+
+
+
+
+<div class="Login">
+    <h4>Login</h4>
+    <div id="Login">
+        <h6 id="LoginResult" style="color:red;">Status: &ensp;Waiting for input...</h6>
+        <input type="text" id="LoginUsernameInput" placeholder="Username" />
+        <input type="password" id="LoginPasswordInput" placeholder="Password" />
+        <button id="LoginButton" onclick="Login();">Login</button>
+    </div>
+
+    <div id="Logout">
+        <button id="LogoutButton" onclick="Logout();">Logout</button>
+    </div>
+</div>
+

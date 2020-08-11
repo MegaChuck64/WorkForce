@@ -1,0 +1,81 @@
+﻿<style>
+    .Register {
+        background-color: rgb(98, 219, 134);
+        padding: 12px;
+        text-align: center;
+        margin: 26px;
+    }
+</style>
+
+
+
+
+<div class="Register">
+    <h4>Register</h4>
+    <h6 id="RegisterResult" style="color:red">Status: &ensp;Waiting for input...</h6>
+
+    <div id="Register">
+        <input type="text" id="RegisterUsernameInput" placeholder="Username" />
+        <input type="password" id="RegisterPasswordInput" placeholder="Password" />
+        <button id="RegisterButton" onclick="Register();">Register</button>
+    </div>
+</div>
+
+
+
+@section Scripts{
+
+    <script>
+
+        var registerUsernameInput = document.getElementById("RegisterUsernameInput");
+        var registerPasswordInput = document.getElementById("RegisterPasswordInput");
+        var registerResult = document.getElementById("RegisterResult");
+        var registerButton = document.getElementById("RegisterButton");
+        
+        UpdateRegister();
+  
+
+        function UpdateRegister() {
+
+            var sessionUser = JSON.parse(sessionStorage.getItem('User'));
+
+
+            if (sessionUser && sessionUser.username && sessionUser.password) {
+                console.log("Logged in");
+                $("#Register").hide();
+                registerResult.innerHTML = "Status: &ensp;Already Logged In...";
+ 
+
+            }
+            else {
+                console.log("Logged out");
+                registerResult.innerHTML = "Status: &ensp;Waiting for Register..."                
+                $("#Register").show();
+
+            }
+
+        }
+        function Register() {
+
+            var user = {
+                Username: registerUsernameInput.value,
+                Password: registerPasswordInput.value
+            };
+            registerResult.innerHTML = "Status: &ensp;Registering..."
+
+            $.post("/Home/Register/", user, function (result) {
+                // console.log(result);
+
+                registerResult.innerHTML = "Status: &ensp;" + result.message;
+
+                if (result.failed == false) {
+
+                    sessionStorage.setItem('User', JSON.stringify(result.result));
+
+                    UpdatePage();
+                }
+            });
+        }
+
+    </script>
+}
