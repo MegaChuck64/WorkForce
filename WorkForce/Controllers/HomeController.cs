@@ -87,6 +87,7 @@ namespace WorkForce.Controllers
 
 
                     sql = $"INSERT INTO Users (Username, Password) " +
+                            "OUTPUT inserted.UserID " +
                             $"VALUES ('{user.Username}', '{user.Password}');";
 
                     using (var conn = new SqlConnection(connStr))
@@ -94,17 +95,30 @@ namespace WorkForce.Controllers
                     {
                         conn.Open();
 
-                        var rowsAffected = comm.ExecuteNonQuery();
-                        if (rowsAffected > 0)
+                        var userID = comm.ExecuteScalar();
+                        if (userID != null)
                         {
                             response.Failed = false;
-                            response.Message = "Successfully registered...";
+                            response.Message = "Successfully registered...\n";
                             response.Result = user;
+
+
+                            comm.CommandText = $"INSERT INTO COINS (UserID, OwnerID, LastTransactionID) VALUES ('{userID}', '{userID}', '0')";
+                            var rowsAffected = comm.ExecuteNonQuery();
+                            
+                            if (rowsAffected > 0)
+                            {
+                                response.Message += $"{user.Username}~Coin Created...\n";
+                            }
+                            else
+                            {
+                                response.Message += $"No coin created...\n";
+                            }
                         }
                         else
                         {
                             response.Failed = true;
-                            response.Message = "Registration unsuccesful.";
+                            response.Message += "Registration unsuccesful....\n";
                             response.Result = null;
                         }
 
