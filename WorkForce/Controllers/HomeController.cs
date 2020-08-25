@@ -4,8 +4,11 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using WorkForce.Models;
 
 namespace WorkForce.Controllers
@@ -30,6 +33,14 @@ namespace WorkForce.Controllers
         public IActionResult Register()
         {
             return View();
+        }
+
+        [HttpPost]
+        public JsonResult Logout()
+        {
+            HttpContext.Session.Remove("User");
+
+            return Json("Logged out");
         }
 
         [HttpPost]
@@ -86,9 +97,9 @@ namespace WorkForce.Controllers
                     //    $"VALUES(@uid, @uid);";
 
 
-                    sql = $"INSERT INTO Users (Username, Password) " +
+                    sql = $"INSERT INTO Users (Username, Password, IsAuthorized) " +
                             "OUTPUT inserted.UserID " +
-                            $"VALUES ('{user.Username}', '{user.Password}');";
+                            $"VALUES ('{user.Username}', '{user.Password}', '0');";
 
                     using (var conn = new SqlConnection(connStr))
                     using (var comm = new SqlCommand(sql, conn))
@@ -101,6 +112,7 @@ namespace WorkForce.Controllers
                             response.Failed = false;
                             response.Message = "Successfully registered...\n";
                             response.Result = user;
+                            HttpContext.Session.SetString("User", JsonConvert.SerializeObject(user));
 
 
                             comm.CommandText = $"INSERT INTO COINS (UserID, OwnerID, LastTransactionID) VALUES ('{userID}', '{userID}', '0')";
@@ -161,7 +173,7 @@ namespace WorkForce.Controllers
             {
 
                 var sql =
-                        "SELECT 1 " +
+                        "SELECT Username, IsAuthorized " +
                         "FROM Users " +
                         $"WHERE UserName = '{user.Username}' " + // username cap insensitive        
                         $"AND Password = '{user.Password}' COLLATE Latin1_General_CS_AS"; // password cap sensitive  
@@ -173,9 +185,13 @@ namespace WorkForce.Controllers
                 using (var rdr = comm.ExecuteReader())
                     while (rdr.Read())
                     {
+                        user.Username = rdr.GetString(0);
+                        user.IsAuthorized = rdr.GetBoolean(1);
+                        response.Result = user;
                         response.Failed = false;
                         response.Message = "Successful login attempt...";
-                        
+
+                        HttpContext.Session.SetString("User", JsonConvert.SerializeObject(user));
                     }
 
 

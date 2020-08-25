@@ -4,39 +4,44 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - WorkForce</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    @*<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />*@
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="~/css/site.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">WorkForce</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>                        
-                        <li id="RegisterLink" class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Register">Register</a>
-                        </li>
-
-
-                    </ul>
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/Home">Cokey~Cola</a>
                 </div>
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="/Home">Home</a></li>
+                    <li><a href="/Trade">Trade</a></li>
+                    @*<li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="/Fantasy">Fantasy <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="/Fantasy?year=2017">2017</a></li>
+                <li><a href="/Fantasy?year=2018">2018</a></li>
+                <li><a href="/Fantasy?year=2019">2019</a></li>
+                <li><a href="/Fantasy?year=2020">2020</a></li>
+                <li><a href="/Fantasy">All</a></li>
+            </ul>
+        </li>*@
+                    <li><a href="/Admin">Admin</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li onclick="SaveLastPage();" id="RegisterLink"><a href="/Home/Register"><span class="glyphicon glyphicon-user"></span>Register</a></li>
+                    <li onclick="SaveLastPage();" id="LoginLink"><a href="/Home/Login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                    <li onclick="Logout();" id="LogoutLink"><a href="#"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                </ul>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @await Html.PartialAsync("Login")
-
-            @RenderBody()
-        </main>
+    <div>
+        @RenderBody()
     </div>
 
     <footer class="border-top footer text-muted">
@@ -52,12 +57,6 @@
 
     <script>
 
-        var usernameInput = document.getElementById("LoginUsernameInput");
-        var passwordInput = document.getElementById("LoginPasswordInput");
-        var loginResult = document.getElementById("LoginResult");
-        var loginButton = document.getElementById("LoginButton");
-        
-
         UpdatePage();
         var loggedIn = false;
 
@@ -68,53 +67,52 @@
 
             if (sessionUser && sessionUser.username && sessionUser.password) {
                 console.log("Logged in");
-                $("#Login").hide();
-                $("#Logout").show();
                 $("#RegisterLink").hide();
+                $("#LoginLink").hide();
+                $("#LogoutLink").show();
                 loggedIn = true;
-                
+
             }
             else {
                 console.log("Logged out");
-                loginResult.innerHTML = "Status: &ensp;Waiting for login..."
-                $("#Logout").hide();
-                $("#Login").show();
                 $("#RegisterLink").show();
+                $("#LoginLink").show();
+                $("#LogoutLink").hide();
 
                 loggedIn = false;
             }
-
-            if ($("#Register").length > 0) {
-                UpdateRegister();
-            }
-
         }
-        function Login() {
 
-            var user = {
-                Username: usernameInput.value,
-                Password: passwordInput.value
-            };
-            loginResult.innerHTML = "Status: &ensp;Logging In..."
-
-            $.post("/Home/Login/", user, function (result) {
-                // console.log(result);
-
-                loginResult.innerHTML = "Status: &ensp;" + result.message;
-
-                if (result.failed == false) {
-
-                    sessionStorage.setItem('User', JSON.stringify(result.result));
-
-                    UpdatePage();
-
-                }
-            });
+        function SaveLastPage() {
+            if (window.location.pathname != "/Home/Register" && window.location.pathname != "/Home/Login")
+            sessionStorage.setItem("LastPage", window.location.pathname);
         }
 
         function Logout() {
+
+            var userJson = sessionStorage.getItem('User')
+
+            console.log("SEND: " + userJson);
+
+            $.ajax({
+                type: 'POST',
+                url: '/Home/Logout/',
+                data: userJson,
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            }).done(
+                function (result) {
+                    console.log("RECEIVED: " + result);
+                    location.reload();
+
+                });
+
             sessionStorage.removeItem('User');
-            UpdatePage();
+
+        
+            
         }
 
     </script>

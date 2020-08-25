@@ -1,0 +1,35 @@
+﻿@{
+
+    @using Microsoft.AspNetCore.Http;
+    @using Newtonsoft.Json;
+
+    ViewData["Title"] = "Admin";
+
+}
+
+<h1>Admin</h1>
+
+
+@{
+
+    var json = Context.Session.GetString("User");
+
+    if (string.IsNullOrEmpty(json))
+    {
+        <h2>Not Logged In...</h2>
+    }
+    else
+    {
+
+        var usr = JsonConvert.DeserializeObject<UserModel>(json);
+        if (usr.IsAuthorized)
+        {
+            <h2>Welcome Admin...</h2>
+        } 
+        else
+        {
+            <h2>NOT AUTHORIZED.....</h2>
+        }
+    }
+}
+

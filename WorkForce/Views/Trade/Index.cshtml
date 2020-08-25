@@ -1,0 +1,76 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+
+<div class="TradeGrid">
+    <div class="TradeHeader">Header</div>
+    <div class="PlaceOrder">
+        <h3>Place Order</h3>
+        <input type="number" placeholder="Price $" id="OrderPrice" />
+        <input type="number" placeholder="Amount #" id="OrderAmount" />
+        <button onclick="PlaceOrder();" class="btn btn-outline-primary btn-sm">Place Order</button>
+    </div>
+    <div class="TradeHistory">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Amount #</th>
+                    <th>Price $</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>100</td>
+                    <td>$2.22</td>
+                </tr>
+                <tr>
+                    <td>56</td>
+                    <td>$2.34</td>
+                </tr>
+                <tr>
+                    <td>23</td>
+                    <td>$2.36</td>
+                </tr>
+                <tr>
+                    <td>577</td>
+                    <td>$2.11</td>
+                </tr>
+                <tr>
+                    <td>25</td>
+                    <td>$2.25</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="TradeChart">
+        <img src="https://docs.devexpress.com/WindowsForms/images/chart-control/chart-zooming-and-scrolling-preview.gif" width="1120" height="632" />
+    </div>
+    <div class="TradeFooter">Footer</div>
+</div>
+
+
+
+@section Scripts{
+
+    <script>
+
+        function PlaceOrder() {
+
+            var orderPrice = document.getElementById("OrderPrice").value;
+            var orderAmount = document.getElementById("OrderAmount").value;
+
+            var data = {
+                Price: orderPrice,
+                Amount: orderAmount,
+                User: JSON.parse(sessionStorage.getItem('User'))
+            }
+
+            $.post("/Trade/Order/", data, function (result) {
+                console.log(result);
+            });
+        }
+    </script>
+
+}

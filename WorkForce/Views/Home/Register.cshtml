@@ -1,6 +1,6 @@
 ﻿<style>
     .Register {
-        background-color: rgb(98, 219, 134);
+        background-color: rgb(50, 50, 50);
         padding: 12px;
         text-align: center;
         margin: 26px;
@@ -11,8 +11,7 @@
 
 
 <div class="Register">
-    <h4>Register</h4>
-    <h6 id="RegisterResult" style="color:red">Status: &ensp;Waiting for input...</h6>
+    <h4 id="RegisterResult" style="color:red">Status: &ensp;Waiting for input...</h4>
 
     <div id="Register">
         <input type="text" id="RegisterUsernameInput" placeholder="Username" />
@@ -44,7 +43,10 @@
                 console.log("Logged in");
                 $("#Register").hide();
                 registerResult.innerHTML = "Status: &ensp;Already Logged In...";
-                window.location.href = "/Home/Index";
+
+                setTimeout(function () {
+                    window.location.href = sessionStorage.getItem('LastPage');
+                }, 500);
 
             }
             else {
@@ -64,13 +66,17 @@
             registerResult.innerHTML = "Status: &ensp;Registering..."
 
             $.post("/Home/Register/", user, function (result) {
-                // console.log(result);
+                console.log(result);
 
                 registerResult.innerHTML = "Status: &ensp;" + result.message;
 
                 if (result.failed == false) {
 
-                    sessionStorage.setItem('User', JSON.stringify(result.result));
+                    var userJson = JSON.stringify(result.result);
+                    console.log(userJson);
+                    sessionStorage.setItem('User', userJson);
+
+                    UpdateRegister();
 
                     UpdatePage();
                 }
